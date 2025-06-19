@@ -1,13 +1,11 @@
 import { FC, PointerEventHandler, useCallback } from "react";
 import { useMachine } from "@xstate/react";
-import { createBrowserInspector } from "@statelyai/inspect";
+
 import { machine } from "./machine";
 import { useVibration } from "./useVibration";
 
-const { inspect } = createBrowserInspector();
-
 export const App: FC = () => {
-  const [snapshot, send] = useMachine(machine, { inspect });
+  const [snapshot, send] = useMachine(machine);
 
   const isBeingTouched = snapshot.matches({
     connected: { readyToReceive: "touched" },
@@ -15,8 +13,6 @@ export const App: FC = () => {
 
   useVibration({
     enabled: isBeingTouched,
-    pattern: [120, 80, 200, 60, 150, 100, 180, 70, 160, 90],
-    interval: 1000,
   });
 
   const action = useCallback((formData: FormData) => {
