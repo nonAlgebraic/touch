@@ -12,6 +12,7 @@ import { useVibration } from "./useVibration";
 
 export const App: FC = () => {
   const [snapshot, send] = useMachine(machine);
+  const [copied, setCopied] = useState(false);
   const [backgroundPulse, setBackgroundPulse] = useState(0);
 
   const isBeingTouched = snapshot.matches({
@@ -36,12 +37,17 @@ export const App: FC = () => {
     }
   }, [isBeingTouched, isTouching]);
 
-  const action = useCallback((formData: FormData) => {
-    send({
-      type: "CONNECT_TO_PEER_BY_ID",
-      peerId: formData.get("peerId") as string,
-    });
-  }, []);
+  const handleCopyId = useCallback(async () => {
+    if (snapshot.context.peer.id) {
+      try {
+        await navigator.clipboard.writeText(snapshot.context.peer.id);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        console.error("Failed to copy:", err);
+      }
+    }
+  }, [snapshot.context.peer.id]);
 
   const handleSubmit = useCallback(
     (formData: FormData) => {
@@ -50,7 +56,7 @@ export const App: FC = () => {
         peerId: formData.get("peerId") as string,
       });
     },
-    [action],
+    [send],
   );
 
   const handleTouch = useCallback<PointerEventHandler<HTMLButtonElement>>(
@@ -79,7 +85,15 @@ export const App: FC = () => {
           <div className="text-6xl font-thin tracking-wider">TOUCH</div>
           <div className="text-sm opacity-70 font-light tracking-wide">
             {snapshot.context.peer.id && (
-              <div className="mb-4">ID: {snapshot.context.peer.id}</div>
+              <div className="mb-4 flex items-center justify-center gap-3">
+                <span>ID: {snapshot.context.peer.id}</span>
+                <button
+                  onClick={handleCopyId}
+                  className="px-3 py-1 bg-white/10 border border-white/20 rounded text-xs hover:bg-white/20 transition-colors"
+                >
+                  {copied ? "copied!" : "copy"}
+                </button>
+              </div>
             )}
             waiting for connection...
           </div>
@@ -90,6 +104,12 @@ export const App: FC = () => {
               placeholder="enter peer ID"
               className="w-full bg-white/10 border border-white/20 rounded-none px-6 py-4 text-center text-white placeholder-white/50 backdrop-blur-sm focus:outline-none focus:border-white/40 font-light tracking-wide"
             />
+            <button
+              type="submit"
+              className="w-full py-4 bg-purple-600/80 border border-purple-500/50 rounded-none text-white font-medium tracking-wide hover:bg-purple-500/80 transition-colors shadow-lg"
+            >
+              connect
+            </button>
           </form>
         </div>
       </div>
