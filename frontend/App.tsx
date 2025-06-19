@@ -157,7 +157,7 @@ export const App: FC = () => {
           filter: `blur(${touchIntensity * 2}px)`,
         }}
       >
-        <div className="text-8xl font-thin tracking-[0.5em] animate-pulse">
+        <div className="text-4xl md:text-8xl font-thin tracking-[0.2em] md:tracking-[0.5em] animate-pulse px-4">
           {isTouching ? "TOUCHING" : isBeingTouched ? "FEELING" : "TOUCH"}
         </div>
       </div>
